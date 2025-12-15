@@ -152,3 +152,56 @@ header button {
 .error {
     color: #c00
 }
+
+/* Confirm modal box */
+.confirm-box {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    width: 320px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.confirm-actions button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 0;
+    cursor: pointer;
+}
+
+.confirm-yes {
+    background: #e74c3c;
+    color: #fff
+}
+
+.confirm-no {
+    background: #ddd
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0)
+}

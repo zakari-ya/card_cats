@@ -14,6 +14,48 @@ function debounce(fn, wait = 200) {
   };
 }
 
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = qs("#confirm-modal");
+    const msg = qs(".confirm-message", modal);
+    msg.textContent = message;
+    modal.classList.remove("hidden");
+
+    const yes = qs(".confirm-yes", modal);
+    const no = qs(".confirm-no", modal);
+
+    function cleanup(result) {
+      modal.classList.add("hidden");
+      yes.removeEventListener("click", onYes);
+      no.removeEventListener("click", onNo);
+      resolve(result);
+    }
+
+    function onYes() {
+      cleanup(true);
+    }
+    function onNo() {
+      cleanup(false);
+    }
+
+    yes.addEventListener("click", onYes);
+    no.addEventListener("click", onNo);
+  });
+}
+
+function showToast(msg, timeout = 3000) {
+  const t = qs("#toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  t.classList.add("show");
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => {
+    t.classList.remove("show");
+    t.classList.add("hidden");
+  }, timeout);
+}
+
 async function fetchCats() {
   if (cachedCats) return cachedCats;
   const res = await fetch(`${apiBase}/cats`);
@@ -41,7 +83,8 @@ function createCard(cat) {
   `;
 
   qs(".delete", el).addEventListener("click", async () => {
-    if (!confirm(`Delete ${cat.name}?`)) return;
+    const ok = await showConfirm(`Delete ${cat.name}?`);
+    if (!ok) return;
     await fetch(`${apiBase}/cats/${cat.id}`, { method: "DELETE" });
     cachedCats = null;
     render();
@@ -107,7 +150,10 @@ async function saveForm(e) {
     img: qs("#img").value.trim() || null,
   };
 
-  if (!payload.name) return alert("Name is required");
+  if (!payload.name) {
+    showToast("Name is required");
+    return;
+  }
 
   if (id) {
     await fetch(`${apiBase}/cats/${id}`, {
