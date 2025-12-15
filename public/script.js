@@ -4,10 +4,22 @@ function qs(sel, parent = document) {
   return parent.querySelector(sel);
 }
 
+let cachedCats = null;
+
+function debounce(fn, wait = 200) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
+
 async function fetchCats() {
+  if (cachedCats) return cachedCats;
   const res = await fetch(`${apiBase}/cats`);
   if (!res.ok) throw new Error("Failed to load cats");
-  return res.json();
+  cachedCats = await res.json();
+  return cachedCats;
 }
 
 function createCard(cat) {
@@ -31,6 +43,7 @@ function createCard(cat) {
   qs(".delete", el).addEventListener("click", async () => {
     if (!confirm(`Delete ${cat.name}?`)) return;
     await fetch(`${apiBase}/cats/${cat.id}`, { method: "DELETE" });
+    cachedCats = null;
     render();
   });
 
@@ -43,11 +56,27 @@ async function render() {
   const container = qs("#cards");
   container.innerHTML = "";
   try {
-    const cats = await fetchCats();
+    let cats = await fetchCats();
     if (!cats || cats.length === 0) {
       container.innerHTML = "<p>No cats yet.</p>";
       return;
     }
+
+    const q = qs("#search") ? qs("#search").value.trim().toLowerCase() : "";
+    if (q) {
+      cats = cats.filter((c) => {
+        const name = (c.name || "").toLowerCase();
+        const tag = (c.tag || "").toLowerCase();
+        const descr = (c.descrpt || "").toLowerCase();
+        return name.includes(q) || tag.includes(q) || descr.includes(q);
+      });
+    }
+
+    if (cats.length === 0) {
+      container.innerHTML = "<p>No cats match your search.</p>";
+      return;
+    }
+
     cats.forEach((c) => container.appendChild(createCard(c)));
   } catch (err) {
     container.innerHTML = `<p class=error>${err.message}</p>`;
@@ -95,6 +124,7 @@ async function saveForm(e) {
   }
 
   closeForm();
+  cachedCats = null;
   render();
 }
 
@@ -103,4 +133,10 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("#open-add").addEventListener("click", () => openForm());
   qs("#cancel").addEventListener("click", closeForm);
   qs("#add-form").addEventListener("submit", saveForm);
+  const searchEl = qs("#search");
+  if (searchEl)
+    searchEl.addEventListener(
+      "input",
+      debounce(() => render(), 200)
+    );
 });
