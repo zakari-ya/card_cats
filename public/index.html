@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Cat Cards</h1>
+        <button id="open-add">+ Add Cat</button>
+    </header>
+
+    <main>
+        <div id="cards" class="cards"></div>
+    </main>
+
+    <div id="add-modal" class="modal hidden">
+        <form id="add-form" class="card-form">
+            <h2>Add / Edit Cat</h2>
+            <input type="hidden" id="cat-id">
+            <label>Name<input id="name" required></label>
+            <label>Tag<input id="tag"></label>
+            <label>Description<textarea id="descrpt"></textarea></label>
+            <label>Image URL<input id="img"></label>
+            <div class="form-actions">
+                <button type="submit" id="save">Enregistrer</button>
+                <button type="button" id="cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
