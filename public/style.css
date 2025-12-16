@@ -23,13 +23,26 @@ header h1 {
     font-size: 20px
 }
 
+header .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 header button {
     padding: 8px 12px;
     border: 0;
     background: #2b8aef;
     color: #fff;
     border-radius: 6px;
-    cursor: pointer
+    cursor: pointer;
+}
+
+header input,
+header select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
 }
 
 .cards {
@@ -94,6 +107,52 @@ header button {
     border-color: #f1a0a0
 }
 
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    /* Reduced gap for a tighter look */
+    padding: 20px;
+    margin-bottom: 40px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #333;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 36px;
+    /* Ensure numbers have some width */
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #f0f0f0;
+    border-color: #ccc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f9f9f9;
+}
+
+.pagination button.active {
+    background: #2b8aef;
+    color: #fff;
+    border-color: #2b8aef;
+    box-shadow: 0 2px 4px rgba(43, 138, 239, 0.3);
+    font-weight: 600;
+}
+
 .modal {
     position: fixed;
     inset: 0;
@@ -101,10 +160,11 @@ header button {
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.35);
+    z-index: 100;
 }
 
 .hidden {
-    display: none
+    display: none !important;
 }
 
 .card-form {
@@ -141,10 +201,12 @@ header button {
 .form-actions button {
     padding: 8px 12px;
     border-radius: 6px;
-    border: 0
+    border: 0;
+    cursor: pointer;
 }
 
-.form-actions #save {
+.form-actions #save,
+.form-actions #auth-submit {
     background: #2b8aef;
     color: #fff
 }
@@ -199,6 +261,7 @@ header button {
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 200;
 }
 
 .toast.show {
