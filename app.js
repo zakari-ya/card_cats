@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcryptjs");
@@ -45,6 +45,29 @@ app.get("/", (req, res) => {
 //   connectionLimit: 10,
 //   queueLimit: 0,
 // });
+
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT || 4000,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
+  }
+});
+
+// Test connection
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to TiDB:', err);
+    return;
+  }
+  console.log('Connected to TiDB Cloud!');
+});
+
 
 // Optionally validate a connection from the pool at startup
 pool.getConnection((err, connection) => {
