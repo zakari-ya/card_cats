@@ -117,7 +117,7 @@ function renderTags(tags) {
 }
 
 async function fetchCats() {
-  let url = `${apiBase}/cats?page=${currentPage}&limit=8`; // Limit 5 as requested
+  let url = `${apiBase}/cats?page=${currentPage}&limit=8`; // Limit 8 as requested
   if (currentTag) url += `&tag=${encodeURIComponent(currentTag)}`;
 
   const search = qs("#search").value.trim();
