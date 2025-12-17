@@ -24,7 +24,7 @@ const app = express();
 app.use(express.json());
 
 // Test database connection
-app.get('/api/my_sql', async (req, res) => {
+app.get('/api/test', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT 1 + 1 AS result');
     res.json({ message: 'Database connected!', result: rows[0].result });
