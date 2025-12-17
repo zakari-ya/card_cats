@@ -7,8 +7,124 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = "supersecretkey_change_this_in_production";
 
-const app = express();
+
 const PORT = process.env.PORT || 5000;
+
+
+
+///this is the new code starting from here
+
+
+require('dotenv').config();
+
+const express = require('express');
+const pool = require('./db');
+
+const app = express();
+app.use(express.json());
+
+// Test database connection
+app.get('/api/my_sql', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT 1 + 1 AS result');
+    res.json({ message: 'Database connected!', result: rows[0].result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET all cats
+app.get('/api/cats', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM cats ORDER BY id DESC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET single cat
+app.get('/api/cats/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM cats WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Cat not found' });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST new cat
+app.post('/api/cats', async (req, res) => {
+  const { name, image, description } = req.body;
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO cats (name, image, description) VALUES (?, ?, ?)',
+      [name, image, description]
+    );
+    res.status(201).json({ 
+      id: result.insertId, 
+      name, 
+      image, 
+      description 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT update cat
+app.put('/api/cats/:id', async (req, res) => {
+  const { name, image, description } = req.body;
+  try {
+    const [result] = await pool.query(
+      'UPDATE cats SET name = ?, image = ?, description = ? WHERE id = ?',
+      [name, image, description, req.params.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Cat not found' });
+    }
+    res.json({ id: req.params.id, name, image, description });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE cat
+app.delete('/api/cats/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM cats WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Cat not found' });
+    }
+    res.json({ message: 'Cat deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+module.exports = app;
+
+
+
+// and end here
+
+
+
+
+
+
+
+
+
+
 
 // Middleware
 app.use(bodyParser.json());
