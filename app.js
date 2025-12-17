@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = "supersecretkey_change_this_in_production";
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
 
 
@@ -152,9 +152,9 @@ app.get("/", (req, res) => {
 
 // MySQL Connection (use a pool so `getConnection` exists)
 const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
+  host: "gateway01.eu-central-1.prod.aws.tidbcloud.com",
+  user: "3JPNg1yk1CnuFvW.root",
+  password: "XtvmRZscqAUNc6TP",
   database: "my_sql",
   waitForConnections: true,
   connectionLimit: 10,
