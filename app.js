@@ -1,15 +1,14 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const pool = require('./db');
 const JWT_SECRET = "supersecretkey_change_this_in_production";
 
-
-// const PORT = process.env.PORT || 4000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
@@ -46,7 +45,6 @@ app.get("/", (req, res) => {
 //   queueLimit: 0,
 // });
 
-
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 4000,
@@ -54,20 +52,13 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-    minVersion: 'TLSv1.2',
-    rejectUnauthorized: true
-  }
+    minVersion: "TLSv1.2",
+    rejectUnauthorized: true,
+  },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
-
-// Test connection
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to TiDB:', err);
-    return;
-  }
-  console.log('Connected to TiDB Cloud!');
-});
-
 
 // Optionally validate a connection from the pool at startup
 pool.getConnection((err, connection) => {
@@ -461,7 +452,9 @@ app.patch("/cats/:id", (req, res) => {
   });
 });
 
-// // Start server
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+module.exports = app;

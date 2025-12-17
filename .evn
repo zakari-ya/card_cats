@@ -1,6 +1,0 @@
-
-DB_HOST=gateway01.us-west-2.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_USER=2aBC3dEf4gHi5jKl.root
-DB_PASSWORD=your_password_here
-DB_NAME=your_database_name
