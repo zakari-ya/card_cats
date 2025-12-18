@@ -49,11 +49,14 @@ const fs = require("fs");
 
 // Debug: Log environment variables (remove in production)
 console.log("=== Database Configuration ===");
-console.log("DB_HOST:", process.env.DB_HOST || "NOT SET");
-console.log("DB_PORT:", process.env.DB_PORT || "NOT SET");
-console.log("DB_USER:", process.env.DB_USER || "NOT SET");
-console.log("DB_NAME:", process.env.DB_NAME || "NOT SET");
-console.log("DB_PASSWORD:", process.env.DB_PASSWORD ? "***SET***" : "NOT SET");
+console.log("TIDB_HOST:", process.env.TIDB_HOST || "NOT SET");
+console.log("TIDB_PORT:", process.env.TIDB_PORT || "NOT SET");
+console.log("TIDB_USER:", process.env.TIDB_USER || "NOT SET");
+console.log("TIDB_DATABASE:", process.env.TIDB_DATABASE || "NOT SET");
+console.log(
+  "TIDB_PASSWORD:",
+  process.env.TIDB_PASSWORD ? "***SET***" : "NOT SET"
+);
 console.log("=============================");
 
 // SSL configuration for TiDB Cloud
@@ -71,11 +74,11 @@ if (process.env.CA) {
 }
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT) || 4000,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.TIDB_HOST,
+  port: parseInt(process.env.TIDB_PORT) || 4000,
+  user: process.env.TIDB_USER,
+  password: process.env.TIDB_PASSWORD,
+  database: process.env.TIDB_DATABASE,
   ssl: sslConfig,
   waitForConnections: true,
   connectionLimit: 10,
