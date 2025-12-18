@@ -46,8 +46,8 @@ app.get("/", (req, res) => {
 // });
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 4000,
+  host: process.env.DB_HOST || "gateway01.us-west-2.prod.aws.tidbcloud.com",
+  port: parseInt(process.env.DB_PORT) || 4000,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -58,31 +58,34 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 60000,
 });
 
-// Optionally validate a connection from the pool at startup
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error("Error connecting to MySQL database:", err);
-    return;
-  }
-  console.log("Connected to MySQL database.");
+// Initialize database tables (only in development, non-blocking)
+if (process.env.NODE_ENV !== "production") {
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Error connecting to MySQL database:", err);
+      return;
+    }
+    console.log("Connected to MySQL database.");
 
-  // Create users table if not exists
-  const createUsersTable = `
+    // Create users table if not exists
+    const createUsersTable = `
     CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       username VARCHAR(255) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL
     )
   `;
-  connection.query(createUsersTable, (err) => {
-    if (err) console.error("Error creating users table:", err);
-    else console.log("Users table ready.");
-  });
+    connection.query(createUsersTable, (err) => {
+      if (err) console.error("Error creating users table:", err);
+      else console.log("Users table ready.");
+    });
 
-  connection.release();
-});
+    connection.release();
+  });
+}
 
 // Auth Routes
 app.post("/register", (req, res) => {
@@ -452,9 +455,11 @@ app.patch("/cats/:id", (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start server (only if not in Vercel environment)
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app;
