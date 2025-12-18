@@ -47,19 +47,27 @@ app.get("/", (req, res) => {
 
 const fs = require("fs");
 
+// SSL configuration for TiDB Cloud
+let sslConfig = {
+  minVersion: "TLSv1.2",
+  rejectUnauthorized: true,
+};
+
+// Only read CA file if it exists (for local development)
+if (process.env.CA) {
+  const caPath = path.join(__dirname, process.env.CA);
+  if (fs.existsSync(caPath)) {
+    sslConfig.ca = fs.readFileSync(caPath);
+  }
+}
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT) || 4000,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: {
-    ca: process.env.CA
-      ? fs.readFileSync(path.join(__dirname, process.env.CA))
-      : undefined,
-    minVersion: "TLSv1.2",
-    rejectUnauthorized: true,
-  },
+  ssl: sslConfig,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
