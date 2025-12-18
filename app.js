@@ -45,14 +45,18 @@ app.get("/", (req, res) => {
 //   queueLimit: 0,
 // });
 
+const fs = require("fs");
+
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "gateway01.us-west-2.prod.aws.tidbcloud.com",
+  host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT) || 4000,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-    ca: fs.readFileSync(path.join(__dirname, process.env.ca)),
+    ca: process.env.CA
+      ? fs.readFileSync(path.join(__dirname, process.env.CA))
+      : undefined,
     minVersion: "TLSv1.2",
     rejectUnauthorized: true,
   },
@@ -170,37 +174,42 @@ app.get("/cats", (req, res) => {
       return;
     }
 
-    let query = "SELECT SQL_CALC_FOUND_ROWS * FROM cats WHERE 1=1";
+    // Build WHERE clause for both queries
+    let whereClause = "WHERE 1=1";
     const params = [];
 
     if (tag) {
-      query += " AND tag = ?";
+      whereClause += " AND tag = ?";
       params.push(tag);
     }
 
     if (search) {
-      query += " AND (name LIKE ? OR descrpt LIKE ?)";
+      whereClause += " AND (name LIKE ? OR descrpt LIKE ?)";
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    query += " LIMIT ? OFFSET ?";
-    params.push(limit, offset);
-
-    connection.query(query, params, (qerr, rows) => {
-      if (qerr) {
+    // First, get the total count
+    const countQuery = `SELECT COUNT(*) as total FROM cats ${whereClause}`;
+    connection.query(countQuery, params, (cerr, countResult) => {
+      if (cerr) {
         connection.release();
-        console.error("Error fetching data:", qerr);
+        console.error("Error fetching count:", cerr);
         return res.status(500).json({ error: "Database query failed" });
       }
 
-      connection.query("SELECT FOUND_ROWS() as total", (terr, trows) => {
+      const total = countResult[0].total;
+
+      // Then get the paginated data
+      const dataQuery = `SELECT * FROM cats ${whereClause} LIMIT ? OFFSET ?`;
+      const dataParams = [...params, limit, offset];
+
+      connection.query(dataQuery, dataParams, (qerr, rows) => {
         connection.release();
-        if (terr) {
-          console.error("Error fetching total count:", terr);
+        if (qerr) {
+          console.error("Error fetching data:", qerr);
           return res.status(500).json({ error: "Database query failed" });
         }
 
-        const total = trows[0].total;
         res.json({
           data: rows,
           pagination: {
