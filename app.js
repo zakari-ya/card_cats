@@ -47,6 +47,15 @@ app.get("/", (req, res) => {
 
 const fs = require("fs");
 
+// Debug: Log environment variables (remove in production)
+console.log("=== Database Configuration ===");
+console.log("DB_HOST:", process.env.DB_HOST || "NOT SET");
+console.log("DB_PORT:", process.env.DB_PORT || "NOT SET");
+console.log("DB_USER:", process.env.DB_USER || "NOT SET");
+console.log("DB_NAME:", process.env.DB_NAME || "NOT SET");
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD ? "***SET***" : "NOT SET");
+console.log("=============================");
+
 // SSL configuration for TiDB Cloud
 let sslConfig = {
   minVersion: "TLSv1.2",
@@ -72,6 +81,9 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 60000,
+  ssl: {
+    rejectUnauthorized: true, // Required for TiDB Cloud
+  },
 });
 
 // Initialize database tables (only in development, non-blocking)
